@@ -114,7 +114,12 @@ class App extends Component {
 				};
 			};
 
+		// With stages: Try dragging by handle, notice UI problem
 		return (<div className='App'>
+			<div style={{marginTop: '50px', width: '100%', padding: '25px'}}>
+				With stages, broken ...
+			</div>
+
 			<mobiscroll.Listview 
 				itemType={DraggableListItem} 
 				data={this.state.newImageList}
@@ -164,6 +169,60 @@ class App extends Component {
 						});
 					}
 				}} />
+
+			<div style={{marginTop: '50px', width: '100%', padding: '25px'}}>
+				Without stages, works fine ...
+			</div>
+
+			<mobiscroll.Listview 
+				itemType={DraggableListItem} 
+				data={this.state.newImageList}
+				theme="mobiscroll"
+				swipe={true}
+				sortable={{handle: 'right'}}
+				iconSlide={true}
+				enhance={true}
+
+				onSortStart={(event, inst) => {
+					console.log('onSortStart');
+					console.log('event.index: ' + event.index);
+					console.log('');
+
+					this.saveBackground = event.target.style.backgroundColor;
+					event.target.style.backgroundColor = '#00c853';
+
+					this.setState(prevState => ({
+						dragStartIndex: event.index,
+						dragStartElement: prevState.newImageList[event.index]
+					}));
+				}}
+
+				onSortEnd={(event, inst) => {
+					const
+						dragStart = this.state.dragStartIndex,
+						dragEnd = event.index;
+
+						event.target.style.backgroundColor = this.saveBackground;
+
+					if (dragEnd !== this.state.dragStart) {
+						const
+							firstHalf = this.state.newImageList.slice(
+								0, dragStart),
+							secondHalf = this.state.newImageList.slice(
+								dragStart+1, 5),
+							sliced = firstHalf.concat(secondHalf),
+							spliced = sliced.slice(0, dragEnd)
+								.concat(this.state.dragStartElement)
+								.concat(sliced.slice(dragEnd, 5));
+
+						this.setState({
+							newImageList: spliced,
+							dragStartIndex: 0,
+							dragStartElement: {}
+						});
+					}
+				}} />
+
 		</div>);
 	}
 }
